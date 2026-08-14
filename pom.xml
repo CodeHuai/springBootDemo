@@ -11,6 +11,7 @@
     <modules>
         <module>helloworld_demo</module>
         <module>properties_demo</module>
+        <module>logback_demo</module>
     </modules>
 
     <name>spring-boot-demo</name>
@@ -44,7 +45,20 @@
         </repository>
     </repositories>
 
+    <dependencies>
+        <!-- 在父pom.xml定义的依赖，子模块可以直接继承，不需要再写dependecy -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
+
     <dependencyManagement>
+        <!-- 这个里面负责的是版本的统一，和依赖继承没有关系 -->
         <dependencies>
             <dependency>
                 <groupId>org.projectlombok</groupId>

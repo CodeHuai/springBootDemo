@@ -1,0 +1,5 @@
+2026-08-14 14:18:10,132 [main] INFO  [com.huai.SpringBootDemoLogbackApplication] StartupInfoLogger.java:55 - Starting SpringBootDemoLogbackApplication using Java 1.8.0_471 on BK-gsdn with PID 31304 (D:\PersonCodeDir\code\java\springBootDemo\logback_demo\target\classes started by Administrator in D:\PersonCodeDir\code\java\springBootDemo)
+2026-08-14 14:18:10,134 [main] INFO  [com.huai.SpringBootDemoLogbackApplication] SpringApplication.java:645 - No active profile set, falling back to 1 default profile: "default"
+2026-08-14 14:18:10,324 [main] INFO  [com.huai.SpringBootDemoLogbackApplication] StartupInfoLogger.java:61 - Started SpringBootDemoLogbackApplication in 0.37 seconds (JVM running for 0.884)
+2026-08-14 14:18:10,326 [main] INFO  [com.huai.SpringBootDemoLogbackApplication] SpringBootDemoLogbackApplication.java:16 - Spring boot启动初始化了 44 个 Bean
+2026-08-14 14:18:10,326 [main] WARN  [com.huai.SpringBootDemoLogbackApplication] SpringBootDemoLogbackApplication.java:17 - Spring boot启动初始化了 44 个 Bean

@@ -1,0 +1,4 @@
+2026-08-14 14:18:10,326 [main] ERROR [com.huai.SpringBootDemoLogbackApplication] SpringBootDemoLogbackApplication.java:18 - Spring boot启动初始化了 44 个 Bean
+2026-08-14 14:18:10,327 [main] ERROR [com.huai.SpringBootDemoLogbackApplication] SpringBootDemoLogbackApplication.java:23 - 【SpringBootDemoLogbackApplication】启动异常：
+java.lang.ArithmeticException: / by zero
+	at com.huai.SpringBootDemoLogbackApplication.main(SpringBootDemoLogbackApplication.java:21)
