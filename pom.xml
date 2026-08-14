@@ -12,6 +12,7 @@
         <module>helloworld_demo</module>
         <module>properties_demo</module>
         <module>logback_demo</module>
+        <module>exceptionHandle_demo</module>
     </modules>
 
     <name>spring-boot-demo</name>
