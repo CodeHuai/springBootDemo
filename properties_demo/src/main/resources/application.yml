@@ -1,0 +1,8 @@
+server:
+  port: 10086
+  servlet:
+    context-path: /demo
+
+spring:
+  profiles:
+    active: dev
