@@ -13,6 +13,7 @@
         <module>properties_demo</module>
         <module>logback_demo</module>
         <module>exceptionHandle_demo</module>
+        <module>orm_JDBCTemplate_demo</module>
     </modules>
 
     <name>spring-boot-demo</name>
