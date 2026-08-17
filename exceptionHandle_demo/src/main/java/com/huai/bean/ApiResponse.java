@@ -80,7 +80,7 @@ public class ApiResponse {
 
 
     /**
-     * 构造一个异常且带数据的API返回
+     * 构造一个异常且带数据的返回
      *
      * @param t    异常
      * @param data 返回数据
@@ -92,7 +92,7 @@ public class ApiResponse {
     }
 
     /**
-     * 构造一个异常且不带数据的API返回
+     * 构造一个异常且不带数据的返回
      *
      * @param t   异常
      * @param <T> {@link BaseException} 的子类
