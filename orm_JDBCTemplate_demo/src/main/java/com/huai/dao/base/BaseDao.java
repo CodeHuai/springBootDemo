@@ -102,6 +102,24 @@ public class BaseDao<T, P> {
         }
     }
 
+    /**
+     * 通用根据主键更新，自增列需要添加 {@link PK} 注解
+     *
+     * @param t          对象
+     * @param id         主键
+     * @param ignoreNull 是否忽略 null 值
+     * @return 操作的行数
+     */
+    private Integer updateById(T t, P id, Boolean ignoreNull) {
+        // update table set xx where id = id
+        String table = this.getTableName(t);
+        List<Field> filterField = this.getField(t, ignoreNull);
+        List<String> columnList = this.getColumns(filterField);
+        String columns = StrUtil.join(Const.SEPARATOR_COMMA, columnList);
+
+        return 1;
+    }
+
 
     /**
      * 根据字段获取列名
