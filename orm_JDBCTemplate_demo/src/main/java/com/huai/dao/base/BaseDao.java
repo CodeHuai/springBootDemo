@@ -79,16 +79,46 @@ public class BaseDao<T, P> {
     }
 
     /**
-     * 通用根据主键删除
+     * 通用根据主键删除（适合主键只有一个字段，而不是关联字段组成的主键）
      *
-     * @param PK 主键
+     * @param id 主键
      * @return 影响行数
      */
-    private Integer deleteById(P PK) {
+    private Integer deleteById(P id) {
         String tableName = this.getTableName();
 
-        // delete from tableName where id = pk
-        return 1;
+        Field[] fields = ReflectUtil.getFields(this.clazz);
+        List<Field> collect = CollUtil.toList(fields).stream().filter(field -> ObjectUtil.isNotNull(field.getAnnotation(PK.class))).collect(Collectors.toList());
+
+        int size = collect.size();
+        if (size > 0) {
+            Field field = collect.get(0);
+            // 这里需要获取字段对应的列名
+            String targetColumnByField = this.getTargetColumnByField(field);
+            String sql = StrUtil.format("DELETE FROM {table} where {column} = ?", Dict.create().set("table", tableName).set("column", targetColumnByField));
+            return jdbcTemplate.update(sql, id);
+        } else {
+            return 0;
+        }
+    }
+
+
+    /**
+     * 根据字段获取列名
+     *
+     * @param field 字段对象
+     * @return 对应列名
+     */
+    private String getTargetColumnByField(Field field) {
+        Column columnAnnotation = field.getAnnotation(Column.class);
+        String columnName;
+
+        if (ObjectUtil.isNotNull((columnAnnotation))) {
+            columnName = columnAnnotation.name();
+        } else {
+            columnName = field.getName();
+        }
+        return columnName;
     }
 
     /**
@@ -101,7 +131,7 @@ public class BaseDao<T, P> {
         if (ObjectUtil.isNotEmpty(annotation)) {
             return StrUtil.format("`{}`", annotation.name());
         } else {
-            return StrUtil.format("`{}`", clazz.getName().toLowerCase());
+            return StrUtil.format("`{}`", clazz.getSimpleName().toLowerCase());
         }
     }
 
@@ -114,14 +144,7 @@ public class BaseDao<T, P> {
     private List<String> getColumns(List<Field> fieldList) {
         ArrayList<String> columnList = CollUtil.newArrayList();
         for (Field field : fieldList) {
-            Column columnAnnotation = field.getAnnotation(Column.class);
-            String columnName;
-
-            if (ObjectUtil.isNotNull((columnAnnotation))) {
-                columnName = columnAnnotation.name();
-            } else {
-                columnName = field.getName();
-            }
+            String columnName = this.getTargetColumnByField(field);
             columnList.add(StrUtil.format("`{}`", columnName));
         }
         return columnList;
@@ -140,7 +163,7 @@ public class BaseDao<T, P> {
 
         List<Field> filterField;
         // 只获取没有加 Ignore注解和PK注解的字段
-        Stream<Field> fieldStream = CollUtil.toList(fields).stream().filter(field -> ObjectUtil.isNull(field.getAnnotation(Ignore.class)) || ObjectUtil.isNull(field.getAnnotation(PK.class)));
+        Stream<Field> fieldStream = CollUtil.toList(fields).stream().filter(field -> ObjectUtil.isNull(field.getAnnotation(Ignore.class)) && ObjectUtil.isNull(field.getAnnotation(PK.class)));
 
         // 是否过滤字段值为null的字段
         if (ignoreNull) {
