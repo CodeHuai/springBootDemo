@@ -2,6 +2,7 @@ package com.huai.dao.base;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -10,7 +11,10 @@ import com.huai.annitation.Ignore;
 import com.huai.annitation.PK;
 import com.huai.annitation.Table;
 import com.huai.constant.Const;
+import com.huai.entity.User;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -87,15 +91,9 @@ public class BaseDao<T, P> {
     private Integer deleteById(P id) {
         String tableName = this.getTableName();
 
-        Field[] fields = ReflectUtil.getFields(this.clazz);
-        List<Field> collect = CollUtil.toList(fields).stream().filter(field -> ObjectUtil.isNotNull(field.getAnnotation(PK.class))).collect(Collectors.toList());
-
-        int size = collect.size();
-        if (size > 0) {
-            Field field = collect.get(0);
-            // 这里需要获取字段对应的列名
-            String targetColumnByField = this.getTargetColumnByField(field);
-            String sql = StrUtil.format("DELETE FROM {table} where {column} = ?", Dict.create().set("table", tableName).set("column", targetColumnByField));
+        String primaryKey = this.getPrimaryKeyColumn();
+        if (ObjectUtil.isNotNull(primaryKey)) {
+            String sql = StrUtil.format("DELETE FROM {table} WHERE {column} = ?", Dict.create().set("table", tableName).set("column", primaryKey));
             return jdbcTemplate.update(sql, id);
         } else {
             return 0;
@@ -113,11 +111,51 @@ public class BaseDao<T, P> {
     private Integer updateById(T t, P id, Boolean ignoreNull) {
         // update table set xx where id = id
         String table = this.getTableName(t);
-        List<Field> filterField = this.getField(t, ignoreNull);
-        List<String> columnList = this.getColumns(filterField);
-        String columns = StrUtil.join(Const.SEPARATOR_COMMA, columnList);
 
-        return 1;
+        List<Field> filterField = this.getField(t, ignoreNull);
+
+        List<String> columnList = this.getColumns(filterField);
+
+        String primaryKey = this.getPrimaryKeyColumn();
+
+        if (ObjectUtil.isNotNull(primaryKey)) {
+            // 处理 set 后的值
+            List<String> columns = columnList.stream().map(cloumn -> StrUtil.appendIfMissing(cloumn, "= ?")).collect(Collectors.toList());
+            String params = StrUtil.join(Const.SEPARATOR_COMMA, columns);
+
+            String sql = StrUtil.format("UPDATE {table} SET {params} WHERE {column} = ?", Dict.create().set("table", table).set("params", params).set("column", primaryKey));
+
+            // 获取对应的值
+            List<Object> collect1 = filterField.stream().map(s -> ReflectUtil.getFieldValue(t, s)).collect(Collectors.toList());
+            collect1.add(id);
+
+            Object[] values = ArrayUtil.toArray(collect1, Object.class);
+
+            // 执行sql
+            return jdbcTemplate.update(sql, values);
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 通用根据主键查询单条记录
+     *
+     * @param id 主键
+     * @return 单条记录
+     */
+    private T getDetailById(P id) {
+        RowMapper<T> rowMapper = new BeanPropertyRowMapper(clazz);
+
+        String table = this.getTableName();
+        String primaryKey = this.getPrimaryKeyColumn();
+
+        if (ObjectUtil.isNotNull(primaryKey)) {
+            String sql = StrUtil.format("SELECT * FROM  {table} WHERE {column} = ?", Dict.create().set("table", table).set("column", primaryKey));
+            return jdbcTemplate.queryForObject(sql, new Object[]{id}, rowMapper);
+        } else {
+            return null;
+        }
     }
 
 
@@ -137,6 +175,25 @@ public class BaseDao<T, P> {
             columnName = field.getName();
         }
         return columnName;
+    }
+
+    /**
+     * 获取表的主键
+     *
+     * @return 表的主键列名
+     */
+    private String getPrimaryKeyColumn() {
+        Field[] fields = ReflectUtil.getFields(this.clazz);
+        List<Field> collect = CollUtil.toList(fields).stream().filter(field -> ObjectUtil.isNotNull(field.getAnnotation(PK.class))).collect(Collectors.toList());
+
+        if (collect.size() > 0) {
+            Field field = collect.get(0);
+            String targetColumnByField = this.getTargetColumnByField(field);
+
+            return targetColumnByField;
+        } else {
+            return null;
+        }
     }
 
     /**
