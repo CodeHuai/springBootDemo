@@ -8,4 +8,20 @@
         from orm_user
         where id = #{id}
     </select>
+
+    <select id="getUserList" parameterType="com.huai.entity.User" resultType="com.huai.entity.User">
+        select *
+        from orm_user
+        <where>
+            <if test="name != null and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertUser" parameterType="com.huai.entity.User" useGeneratedKeys="true" keyProperty="id"
+            keyColumn="id">
+        insert into orm_user (name, password, salt, email, phone_number, status, create_time)
+        values (#{name}, #{password}, #{salt}, #{email}, #{phoneNumber}, #{status}, #{createTime})
+    </insert>
 </mapper>

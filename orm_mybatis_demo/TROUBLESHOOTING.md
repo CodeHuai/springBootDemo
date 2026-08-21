@@ -93,3 +93,44 @@
   private IUserService userService;   // 声明接口，注入进来的仍是 UserServiceImpl 实例
   ```
 - **教训**：**实例永远是实现类的，声明永远用接口类型**——面向接口编程，将来换实现类，调用方一行不用改
+
+## Mapper XML 编写
+
+### 7. 启动报 Error parsing Mapper XML（占位符括号笔误）
+- **现象**：启动直接失败，满屏 `UnsatisfiedDependencyException` → `BeanCreationException` 层层套娃，最内层 Caused by：
+  ```
+  BuilderException: Error parsing Mapper XML. The XML location is '...target\classes\mapper\userMapper.xml'.
+  Cause: Parsing error was found in mapping #{status), #{createTime}.
+  Check syntax #{property|(expression), var1=value1, ...}
+  Caused by: java.lang.StringIndexOutOfBoundsException
+  ```
+- **复现**：insert 语句里把 `#{status}` 手滑写成 `#{status)`（`}` 成了 `)`），重启
+- **根因**：MyBatis 扫描占位符只认 `#{` 开、`}` 闭。`#{status)` 等不到自己的 `}`，一路吞过 `)` 和下一个 `#{`，直到 `#{createTime}` 的 `}` 才闭合——**两个占位符被并成一个畸形 token**（报错里俩字段"连体"就是这类笔误的签名特征）。XML 解析发生在启动建 SqlSessionFactory 时，所以语法错一律启动即炸；外层那串 bean 失败（sqlSessionFactory → userMapper → userServiceImpl → userController）全是连环断供的连带伤害
+- **修复**：`#{status)` → `#{status}`。行尾分号实测 MySQL 单条语句能容忍（后续踩 insert 时验证过），但按规范建议删掉——mapper XML 里的 SQL 语句不写分号
+- **教训**：Spring 套娃堆栈从**最内层 Caused by** 读起；两个占位符在报错里"连体" = 中间有个没闭合的 `#{`；这串报错看着吓人，真凶只有一个
+
+### 8. insert 后拿不到自增 id（前端要新用户信息怎么办）
+- **现象**：新增成功，但返回的 user 里 id 是 null；想再查一次拿完整数据，按 name 查又会撞同名
+- **复现**：`<insert>` 不配回填属性，插入后读 `user.getId()`
+- **根因**：mapper 的 insert 方法**返回值是影响行数**（1 = 插了一行），id 从来不走返回值；主键是数据库在 insert 那一刻分配的，MyBatis 默认插完扭头就走，不会去要
+- **修复**：`<insert>` 加属性对，id 自动回填进参数对象：
+  ```xml
+  <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+  ```
+  - `useGeneratedKeys="true"`：**开关**——insert 后向数据库回取自增主键（底层 JDBC 的 RETURN_GENERATED_KEYS + getGeneratedKeys()）
+  - `keyProperty="id"`：**去向**——拿到后反射 `setId()` 塞回参数对象；填的是 Java 属性名，不是列名
+  - `keyColumn`：表列名 ≠ 属性名时才必须写（列叫 user_id、属性叫 id 这类），MySQL 常可省略
+  - `<selectKey>`：不靠数据库自增时（Oracle 序列 / 雪花 id）"先取号再插"的替代方案，MySQL 用不上，认脸即可
+
+  时序：SQL 执行 → 库分配 id → MyBatis 要回 → setId 回填 → 方法返回。之后 controller 直接 `ApiResponse.success(user)`，无需二次查询
+- **教训**：**insert 返回行数，id 走回填**；确要回读完整行（DB 默认值/触发器加工过的字段）也是拿回填的 id 去 selectById（按主键查），别按业务字段猜——name 会重名，主键不会
+
+## Web 层参数绑定
+
+### 9. JSON 传参，controller 形参对象字段全为 null
+- **现象**：POST 发 JSON body（`{"name":"小花","email":"10087@qq.com",...}`），controller 里 `User user` 对象不是 null，但**所有字段都是 null**，insert 进库一行全空数据
+- **复现**：`insertUser(User user)` 参数上不加 `@RequestBody`，Postman 以 raw JSON 调用
+- **根因**：无注解的复杂类型参数按 @ModelAttribute 处理——Spring 先 new 一个空对象，再去**查询串/表单参数**里按字段名逐个绑定；而 JSON 数据在**请求体**里。体和串是两条互不相通的通道，一个字段都绑不上。`@RequestBody` 的作用就是切换通道：让 Jackson 反序列化请求体
+- **修复**：参数加 `@RequestBody`，请求头 `Content-Type: application/json`。注意 `getUserList(User user)` 这类无注解绑定只认 `?name=xx` / form 格式——不是 bug，是通道不同，调用姿势要匹配
+- **教训**：**体里的 JSON 必须 @RequestBody 接，串里的参数不用它接**；"对象不是 null 但字段全空" = 绑定通道错了，第一时间查参数注解
+
