@@ -1,10 +1,9 @@
 package com.huai.mapper;
 
+import com.huai.entity.User;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Component;
 
 @Mapper
-@Component
 public interface UserMapper {
-
+    User getUserById(Long id);
 }
