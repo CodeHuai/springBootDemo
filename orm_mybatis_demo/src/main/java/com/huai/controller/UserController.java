@@ -36,4 +36,15 @@ public class UserController {
     }
 
     // 更新用户信息
+    @PostMapping("/updateUserInfo/{id}")
+    public ApiResponse updateUserInfo(@PathVariable("id") long id, @RequestBody User user) {
+        return ApiResponse.success(iUserService.updateUserInfo(id, user));
+    }
+
+    // 删除用户
+    @GetMapping("/removeUserById/{id}")
+    public ApiResponse removeUserById(@PathVariable("id") Long id) {
+        Boolean flag = iUserService.removeUserById(id);
+        return flag ? ApiResponse.success() : ApiResponse.error();
+    }
 }

@@ -12,4 +12,8 @@ public interface UserMapper {
     List<User> getUserList(User user);
 
     Integer insertUser(User user);
+
+    Integer updateUserInfo(User user);
+
+    Integer removeUserById(Long id);
 }

@@ -11,4 +11,8 @@ public interface IUserService {
     List<User> getUserList(User user);
 
     Boolean insertUser(User user);
+
+    User updateUserInfo(Long id, User user);
+
+    Boolean removeUserById(Long id);
 }

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -56,6 +55,32 @@ public class UserServiceImpl implements IUserService {
         Integer i = userMapper.insertUser(user);
 
         return i > 0;
+    }
+
+    @Override
+    public User updateUserInfo(Long id, User user) {
+        if (ObjectUtil.isNotNull(id) || StrUtil.isNotBlank(id.toString())) {
+            User targetUser = this.getUserById(id);
+
+            if (ObjectUtil.isNotNull(targetUser) && ObjectUtil.isNotNull(user)) {
+                user.setId(id);
+                Integer index = userMapper.updateUserInfo(user);
+                if (index > 0) {
+                    User afterUserInfo = userMapper.getUserById(id);
+                    return afterUserInfo;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Boolean removeUserById(Long id) {
+        if (StrUtil.isNotBlank(id.toString())) {
+            Integer index = userMapper.removeUserById(id);
+            return index > 0;
+        }
+        return false;
     }
 
 

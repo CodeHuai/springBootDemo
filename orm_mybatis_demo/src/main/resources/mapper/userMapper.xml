@@ -24,4 +24,35 @@
         insert into orm_user (name, password, salt, email, phone_number, status, create_time)
         values (#{name}, #{password}, #{salt}, #{email}, #{phoneNumber}, #{status}, #{createTime})
     </insert>
+
+    <update id="updateUserInfo" parameterType="com.huai.entity.User">
+        update orm_user
+        <set>
+            <if test="name != null and name != ''">
+                name=#{name},
+            </if>
+            <if test="password != null and password != ''">
+                password=#{password},
+            </if>
+            <if test="salt != null and salt != ''">
+                salt=#{salt},
+            </if>
+            <if test="email != null and email != ''">
+                email=#{email},
+            </if>
+            <if test="phoneNumber != null and phoneNumber != ''">
+                phone_number=#{phoneNumber},
+            </if>
+            <if test="status != null and status != ''">
+                status=#{status}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="removeUserById">
+        delete
+        from orm_user
+        where id = #{id}
+    </delete>
 </mapper>
