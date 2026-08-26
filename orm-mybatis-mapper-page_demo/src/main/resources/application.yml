@@ -1,0 +1,37 @@
+server:
+  port: 10086
+  servlet:
+    context-path: /demo
+
+
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/furns_ssm?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    # 开启驼峰映射
+    map-underscore-to-camel-case: true
+
+
+# 打印 mapper 的 SQL 日志：能直观看到 PageHelper 改写后的 count 和 LIMIT 语句长什么样
+logging:
+  level:
+    com.huai.mapper: debug
+
+
+# PageHelper 分页插件配置
+pagehelper:
+  # 是否自动检测数据库方言，配置了 helper-dialect 后此项可省略
+  auto-dialect: true
+  # 指定分页方言为 mysql，即分页时自动拼接 LIMIT 语句
+  helper-dialect: mysql
+  # 分页合理化：页码 < 1 时查询第一页，页码 > 最大页时查询最后一页（而不是返回空数据）
+  reasonable: true
+  # 对应 count 查询的参数替换，执行分页查询时会自动生成 count(countSql) 形式的总记录数查询
+  params: count=countSql

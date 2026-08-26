@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huai.mapper.UserMapper">
+
+    <!-- 搜索条件抽成公共片段：列表查询和 count 查询必须用同一份条件，
+         否则 total 和 list 对不上（手写分页最容易犯的错）。
+         <where> 会自动去掉开头多余的 AND；<if> 实现条件可选：参数为 null 就不拼这段 SQL -->
+    <sql id="queryCondition">
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="startTime != null">
+                <!-- XML 里 < 和 > 是特殊字符，必须写成 &lt; &gt;（或用 CDATA 包起来） -->
+                AND create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND create_time &lt; #{endTime}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 方式一：条件 + PageHelper 分页。SQL 不写 LIMIT，
+         插件生成的 count(0) 会自动带上这里的 WHERE 条件 -->
+    <select id="selectUserList" resultType="com.huai.entity.User">
+        SELECT id,
+        name,
+        email,
+        phone_number,
+        status,
+        create_time,
+        last_login_time,
+        last_update_time
+        FROM orm_user
+        <include refid="queryCondition"/>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 方式二：条件 + 手写 LIMIT。#{offset} 取自 PageQuery.getOffset() -->
+    <select id="selectUserPage" resultType="com.huai.entity.User">
+        SELECT id,
+               name,
+               email,
+               phone_number,
+               status,
+               create_time,
+               last_login_time,
+               last_update_time
+        FROM orm_user
+        <include refid="queryCondition"/>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 方式二配套：count 复用同一份条件片段 -->
+    <select id="countUser" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM orm_user
+        <include refid="queryCondition"/>
+    </select>
+
+</mapper>

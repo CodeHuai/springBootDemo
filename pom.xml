@@ -15,6 +15,7 @@
         <module>exceptionHandle_demo</module>
         <module>orm_JDBCTemplate_demo</module>
         <module>orm_mybatis_demo</module>
+        <module>orm-mybatis-mapper-page_demo</module>
     </modules>
 
     <name>spring-boot-demo</name>

@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.huai</groupId>
+        <artifactId>spring-boot-demo</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>orm-mybatis-mapper-page_demo</artifactId>
+    <packaging>jar</packaging>
+
+    <name>orm-mybatis-mapper-page_demo</name>
+    <url>http://maven.apache.org</url>
+    <description>此 demo 演示了 Spring Boot
+        如何集成通用Mapper插件和分页助手插件，简化Mybatis开发，带给你难以置信的开发体验。
+    </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <mybatis.mapper.version>2.0.4</mybatis.mapper.version>
+        <!-- 1.2.9 的 PageHelperAutoConfiguration 在 Spring Boot 2.6+（默认禁循环依赖）下启动报
+             "BeanCurrentlyInCreationException" 循环引用错误，1.4.1 起修复 -->
+        <mybatis.pagehelper.version>1.4.7</mybatis.pagehelper.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- 通用Mapper -->
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper-spring-boot-starter</artifactId>
+            <version>${mybatis.mapper.version}</version>
+        </dependency>
+
+        <!-- 分页助手 -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>${mybatis.pagehelper.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Boot 2.6 的 starter-test 只带 JUnit 5，需显式引入 JUnit 4 才能 compile 出 Archetype 生成的 junit.framework 风格 AppTest -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>spring-boot-demo-orm-mybatis-mapper-page</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
