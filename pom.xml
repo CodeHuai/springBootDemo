@@ -16,6 +16,7 @@
         <module>orm_JDBCTemplate_demo</module>
         <module>orm_mybatis_demo</module>
         <module>orm-mybatis-mapper-page_demo</module>
+        <module>orm-mybatis-plus_demo</module>
     </modules>
 
     <name>spring-boot-demo</name>

@@ -44,13 +44,13 @@
     <!-- 方式二：条件 + 手写 LIMIT。#{offset} 取自 PageQuery.getOffset() -->
     <select id="selectUserPage" resultType="com.huai.entity.User">
         SELECT id,
-               name,
-               email,
-               phone_number,
-               status,
-               create_time,
-               last_login_time,
-               last_update_time
+        name,
+        email,
+        phone_number,
+        status,
+        create_time,
+        last_login_time,
+        last_update_time
         FROM orm_user
         <include refid="queryCondition"/>
         ORDER BY create_time DESC
