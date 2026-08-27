@@ -11,7 +11,7 @@
 | Spring Boot | 2.6.13 | 2.1.0.RELEASE |
 | groupId / 包名 | `com.huai` | `com.xkcoding` |
 | 模块命名 | `xxx_demo`（如 `helloworld_demo`） | `demo-xxx`（如 `demo-helloworld`） |
-| 已建模块 | `helloworld_demo`（逐步增加中） | 55+ |
+| 已建模块 | 8 个（逐步增加中） | 55+ |
 
 > 版本说明：保留较新的 2.6.13 以规避老版本安全问题；命名空间与模块命名按个人习惯调整，知识点本身仍参照原项目学习。
 
@@ -29,9 +29,15 @@ springBootDemo/                 ← 父工程（packaging=pom，不含代码）
 ├── pom.xml                     ← 聚合 + dependencyManagement 统一版本
 ├── README.md                   ← 本文件
 ├── 新手阅读顺序.md               ← 学习路线（必看）
-└── helloworld_demo/            ← 子模块：每个知识点一个
-    ├── pom.xml
-    └── src/main/...
+├── TROUBLESHOOTING.md          ← 踩坑记录：排查过的报错按「模块→现象→根因→修复」沉淀
+├── helloworld_demo/            ← 以下每个目录一个知识点，可独立运行
+├── properties_demo/
+├── logback_demo/
+├── exceptionHandle_demo/
+├── orm_JDBCTemplate_demo/
+├── orm_mybatis_demo/
+├── orm-mybatis-mapper-page_demo/
+└── orm-mybatis-plus_demo/
 ```
 
 ## 如何运行一个模块
@@ -46,6 +52,8 @@ $ mvn spring-boot:run
 
 或在 IDEA 中找到各模块的启动类（如 `HelloworldDemoApplication`）直接运行。
 
+> ORM 系列模块（orm_*）的验证方式以单元测试为主：在模块目录下 `mvn test`，或在 IDEA 中右键运行测试类（如 `orm-mybatis-plus_demo` 的 `UserTest`）。运行前确认各模块 `application.yml` 里的数据库连接指向本机。
+
 ## 如何新增一个模块（学习新知识点时）
 
 1. 打开 [新手阅读顺序.md](./新手阅读顺序.md)，按阶段顺序学习。
@@ -57,9 +65,28 @@ $ mvn spring-boot:run
 
 ## 已建模块
 
+### 基础入门
+
 | 模块 | 简介 |
 | --- | --- |
-| [helloworld_demo](./helloworld_demo) ✅ | spring-boot 的一个 helloworld，入门 |
+| [helloworld_demo](./helloworld_demo) ✅ | 第一个 Spring Boot 应用：启动类 + REST 接口返回 JSON |
+| [properties_demo](./properties_demo) ✅ | 配置文件读取：`@Value` 与 `@ConfigurationProperties`（ApplicationProperty / DeveloperProperty 两组配置的绑定） |
+
+### 日志与异常
+
+| 模块 | 简介 |
+| --- | --- |
+| [logback_demo](./logback_demo) ✅ | logback 日志：控制台 + 文件双路输出，文件按日期与大小滚动拆分 |
+| [exceptionHandle_demo](./exceptionHandle_demo) ✅ | 统一异常处理：API 接口异常封装统一返回格式（ApiResponse），页面请求异常统一跳错误页（`@ControllerAdvice`） |
+
+### ORM 演进（同一张 `orm_user` 表的四代实现，建议按序对照学习）
+
+| 模块 | 简介 |
+| --- | --- |
+| [orm_JDBCTemplate_demo](./orm_JDBCTemplate_demo) ✅ | 第一代：JdbcTemplate 手写 SQL，自制 `@Table`/`@Column`/`@PK` 注解封装通用 Dao 层 |
+| [orm_mybatis_demo](./orm_mybatis_demo) ✅ | 第二代：原生 MyBatis（mybatis-spring-boot-starter），Mapper 接口 + XML 完整 CRUD |
+| [orm-mybatis-mapper-page_demo](./orm-mybatis-mapper-page_demo) ✅ | 第三代：MyBatis + 通用 Mapper（免写单表 CRUD）+ PageHelper 物理分页 |
+| [orm-mybatis-plus_demo](./orm-mybatis-plus_demo) 🚧 | 第四代：MyBatis-Plus——BaseMapper/IService 免 SQL CRUD、`MetaObjectHandler` 公共字段自动填充、分页插件；学习进行中 |
 
 ## 参考项目
 
