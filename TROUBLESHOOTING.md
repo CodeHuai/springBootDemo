@@ -71,6 +71,22 @@
   ```
 - **教训**："一半字段有值一半 null"先找 null 字段的共同点——带下划线的列全 null 就是驼峰映射问题；另注意 `lastLoginTime` 在库里真实为 null（用户从未登录），修完它仍为 null 属正常，别再排查一轮
 
+### 9. 忘注册分页拦截器：selectPage 不报错，但 SQL 无 LIMIT、total=0、records 全量
+- **模块**：mybatis-plus_demo
+- **现象**：不注册分页拦截器直接调 `selectPage(page, wrapper)`：不报错；SQL 日志里只有一条查询，不带 `LIMIT`，也没有 COUNT 语句；返回的 Page 中 `records` 是满足条件的**全量数据**，`total=0`、`pages=0`
+- **复现**：注释掉分页插件的 @Bean（或压根没写配置类），yml 开 `mybatis-plus.configuration.log-impl: StdOutImpl` 打印 SQL，调一次分页接口
+- **根因**：对 MyBatis 而言 `selectPage` 只是普通查询方法、`Page` 只是普通参数，它不认识"分页"概念；分页能力全部来自拦截器在 SQL 执行链上"顺手"做的两件事——拼 `LIMIT` + 补发 COUNT。拦截器不在场就按普通查询原样透传，`total` 无人赋值、保持初始值 0。这是 MyBatis 插件体系的设计哲学：插件是"增强"，缺失即静默降级，而非故障
+- **修复**：注册分页插件（3.5.9+ 需先引 `mybatis-plus-jsqlparser-4.9`，见第 6 条）：
+  ```java
+  @Bean
+  public MybatisPlusInterceptor mybatisPlusInterceptor() {
+      MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+      interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+      return interceptor;
+  }
+  ```
+- **教训**：不报错 ≠ 没坑——静默失败最危险，大表上忘配拦截器等于一次查全表、内存直接被打爆；以后排查"分页 total=0"这类问题，第一反应先查拦截器配没配
+
 ## 依赖与版本兼容
 
 ### 5. 启动报 documentationPluginsBootstrapper NPE：Springfox 3.0.0 不兼容 Spring Boot 2.6+
