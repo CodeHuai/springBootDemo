@@ -95,6 +95,18 @@
   ```
 - **教训**：不报错 ≠ 没坑——静默失败最危险，大表上忘配拦截器等于一次查全表、内存直接被打爆；以后排查"分页 total=0"这类问题，第一反应先查拦截器配没配
 
+### 11. `${ew.customSqlSegment}` 里的 ew 是什么；自定义分页方法要不要传 QueryWrapper
+- **模块**：mybatis-plus_demo
+- **现象**：自定义 XML 分页方法，条件已全写在 XML 里，不确定 QueryWrapper 是否必须传；教程里 `${ew.customSqlSegment}` 的 `ew` 指什么看不懂
+- **复现**：照教程写"自定义分页 + wrapper"组合时产生疑惑
+- **根因**：概念混淆——**分页靠的是 IPage + 拦截器，QueryWrapper 只是"条件的载体"，两者无绑定关系**。条件固定在 XML 里时 wrapper 完全不需要，签名写 `IPage<Order> selectOrderPage(IPage<Order> page)` 即可。wrapper 只在两处被需要：① 内置方法（selectPage 等，没有 XML，WHERE 只能靠它传，且无条件时可传 null）；② 自定义 XML 想接动态条件（XML 写 `${ew.customSqlSegment}`）
+- **修复/正解**：
+  - `ew` 就是 wrapper 的**参数名**——方法参数上 `@Param(Constants.WRAPPER)`（常量值即字符串 `"ew"`），XML 里 `${ew.customSqlSegment}` 意思是"取名叫 ew 的参数，调它的 getCustomSqlSegment()"。名字来历：2.x 老类 EntityWrapper 的缩写，3.x 类改名 QueryWrapper 后参数名沿用。写 `@Param("w")` 配 `${w.customSqlSegment}` 一样能跑——ew 只是社区统一的暗号
+  - `customSqlSegment` 是 wrapper 在内存里拼好的**完整 WHERE 片段**（含 WHERE 关键字）；无条件时返回 null，MyBatis 会把 null 替换成空字符串，不留垃圾
+  - 安全分工：片段里**列名走 `${}` 原样拼接、不做任何校验**（之前 Unknown column 'age' 就是这个特性干的）；**值存在 wrapper 内部 map 里，以 `#{ew.paramNameValuePairs.MPGENVALn}` 预编译占位符送达**，防注入。所以 `${ew.customSqlSegment}` 是唯一推荐的 `${}` 用法——前提是列名永远不拼接用户输入
+  - 动态条件两种风格二选一：`<where><if test="...">` + @Param（主流）；wrapper + `${ew.customSqlSegment}`
+- **教训**：wrapper 是条件的载体，不是分页的配件——条件在哪，wrapper 就出现在哪，别处都是多余的；`ew` 不神秘，只是个约定好的参数名
+
 ## 依赖与版本兼容
 
 ### 5. 启动报 documentationPluginsBootstrapper NPE：Springfox 3.0.0 不兼容 Spring Boot 2.6+

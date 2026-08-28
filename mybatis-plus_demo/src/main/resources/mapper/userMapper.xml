@@ -14,7 +14,7 @@
     </resultMap>
 
 
-    <select id="selectOrdersVo" resultType="com.huai.domain.OrderVO">
+    <select id="selectOrdersVo" resultType="com.huai.domain.OrderVO" resultMap="orderMap">
         select o.id,
                o.order_id,
                o.user_id,
@@ -25,6 +25,20 @@
                u.gender
         from t_order as o
                  left join user as u
-        on o.user_id = u.id
+                           on o.user_id = u.id and u.age &lt; 20
+    </select>
+
+    <select id="selectOrderPage" resultMap="orderMap" resultType="com.huai.domain.OrderVO">
+        select o.id,
+               o.order_id,
+               o.user_id,
+               o.goods_name,
+               o.goods_price,
+               u.name,
+               u.age,
+               u.gender
+        from t_order as o
+                 left join user as u
+                           on o.user_id = u.id
     </select>
 </mapper>

@@ -1,6 +1,7 @@
 package com.huai;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.huai.domain.OrderVO;
 import com.huai.entity.User;
@@ -65,5 +66,14 @@ public class UserTest {
     public void selectOrdersVo() {
         List<OrderVO> uorderVoList = userMapper.selectOrdersVo();
         log.debug("uorderVoList: {}", uorderVoList);
+    }
+
+    // 联表查询支持分页
+    @Test
+    void testSelectOrdersPage() {
+        // 查询第一页，每页显示 10 条
+        Page<OrderVO> page = new Page<>(1, 2);
+        IPage<OrderVO> page1 = userMapper.selectOrderPage(page);
+        System.out.println(page1);
     }
 }
