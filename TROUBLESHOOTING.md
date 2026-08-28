@@ -26,6 +26,14 @@
 - **修复**：建语义独立的库，URL 指向库，DDL 脚本补 `CREATE DATABASE IF NOT EXISTS ... ; USE ...;`
 - **教训**：URL 结构 `jdbc:mysql://主机:端口/库名?参数`，每个位置含义固定
 
+### 10. left join 忘写 ON、连接条件放 WHERE：报 SQL syntax 错误
+- **模块**：mybatis-plus_demo（订单关联用户查询）
+- **现象**：执行关联查询报 `You have an error in your SQL syntax; ... near 'where o.user_id = u.id'`
+- **复现**：`from t_order as o left join user as u where o.user_id = u.id`——JOIN 后面没写 ON，把连接条件放到了 WHERE 里
+- **根因**：JOIN 的固定句式是 `左表 join 右表 on 连接条件`，**ON 是 JOIN 的组成部分**，不可省略、也不能用 WHERE 顶替。附带语义坑：LEFT JOIN 下连接条件放 WHERE，右表没匹配上的行（列为 NULL）会被 WHERE 比较过滤掉，**LEFT JOIN 退化成 INNER JOIN**，左表"全保留"的语义名存实亡
+- **修复**：连接条件挪到 ON——`from t_order o left join user u on o.user_id = u.id`；若本来就要"只查两边都匹配的行"，直接写 `join`（inner join）更诚实
+- **教训**：**ON 是"怎么连"，WHERE 是"连完之后怎么筛"**——连接条件永远放 ON，WHERE 只放业务筛选（如 `o.goods_price > 100`）
+
 ## MyBatis
 
 ### 3. update 接口返回 id 为 null：Controller 把请求体对象原样弹回

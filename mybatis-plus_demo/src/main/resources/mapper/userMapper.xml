@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huai.mapper.UserMapper">
+    <resultMap id="orderMap" type="com.huai.domain.OrderVO">
+        <result property="userName" column="name"/>
+        <result property="userAge" column="age"/>
+        <result property="userGender" column="gender"/>
+        <result property="orderId" column="order_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="goodsPrice" column="goods_price"/>
+    </resultMap>
+
+
+    <select id="selectOrdersVo" resultType="com.huai.domain.OrderVO">
+        select o.id,
+               o.order_id,
+               o.user_id,
+               o.goods_name,
+               o.goods_price,
+               u.name,
+               u.age,
+               u.gender
+        from t_order as o
+                 left join user as u
+        on o.user_id = u.id
+    </select>
+</mapper>

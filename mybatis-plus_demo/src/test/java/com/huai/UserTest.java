@@ -2,6 +2,7 @@ package com.huai;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.huai.domain.OrderVO;
 import com.huai.entity.User;
 import com.huai.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @SpringBootTest
@@ -57,5 +59,11 @@ public class UserTest {
         userPage = userMapper.selectPage(userPage, userQueryWrapper);
 
         log.debug("【userPage】：{}", userPage.getRecords());
+    }
+
+    @Test
+    public void selectOrdersVo() {
+        List<OrderVO> uorderVoList = userMapper.selectOrdersVo();
+        log.debug("uorderVoList: {}", uorderVoList);
     }
 }
